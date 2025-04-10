@@ -1,0 +1,21 @@
+{
+  "geode": "4.3.1",
+  "early-load": true,
+  "gd": {
+    "win": "2.2074",
+    "android": "2.2074",
+    "mac": "2.2074",
+    "ios": "2.2074"
+  },
+  "version": "1.0.0",
+  "id": "user95401.animate-this-sprite",
+  "name": "Animate This Sprite!",
+  "developers": [ "user95401" ],
+  "description": "Bring your animation to created sprites in game.",
+  "tags": [ "interface", "utility" ],
+  "links": {
+    "community": "https://discord.gg/6SxAbk3bTA",
+    "homepage": "https://t.me/user95401_channel",
+    "source": "https://github.com/user95401/Animate-This-Sprite"
+  }
+}
