@@ -168,7 +168,6 @@ class $modify(CCScale9SpriteAnimatorAttach, CCScale9Sprite) {
     static void onModify(auto & self) {
         auto names = {
             "cocos2d::extension::CCScale9Sprite::create",
-            "cocos2d::extension::CCScale9Sprite::createWithSpriteFrameName",
         };
         for (auto name : names) if (!self.setHookPriorityPost(name, Priority::Last)) {
             log::error("Failed to set hook priority for {}.", name);
@@ -178,12 +177,6 @@ class $modify(CCScale9SpriteAnimatorAttach, CCScale9Sprite) {
     static CCScale9Sprite* create(const char* file, CCRect rect) {
         auto rtn = CCScale9Sprite::create(file, rect);
         attachAnimator(rtn, file);
-        return rtn;
-    }
-
-    static CCScale9Sprite* createWithSpriteFrameName(const char* spriteFrameName) {
-        auto rtn = CCScale9Sprite::createWithSpriteFrameName(spriteFrameName);
-        attachAnimator(rtn, spriteFrameName);
         return rtn;
     }
 
