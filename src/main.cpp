@@ -8,7 +8,7 @@ auto FOUND_ANIMATE_FILES() {
     FOUNDED_ANIMATE_FILES.clear();
     for (auto path : CCFileUtils::get()->getSearchPaths()) {
         //.animate.json
-        for (auto file : file::readDirectory(path).unwrapOrDefault())
+        for (auto file : file::readDirectory(path.c_str()).unwrapOrDefault())
             if (string::contains(file.string(), ".animate.json")) FOUNDED_ANIMATE_FILES[std::filesystem::path(file).filename().string()] = file;
     };
 };
@@ -115,11 +115,12 @@ static void attachAnimator(CCNode* node, std::string name) {
     //log::debug("{}", frames);
 
     //iyea i know same thing exists in engine but i want made my analog :>
-    node->setUserObject(fmt::format("animator-frames-array-{}", (int)frames), frames);
-    node->runAction(CCRepeatForever::create(CCSpawn::create(CallFuncExt::create([node, frames] {
+    auto ptrTag = reinterpret_cast<uintptr_t>(frames);
+    node->setUserObject(fmt::format("animator-frames-array-{}", ptrTag), frames);
+    node->runAction(CCRepeatForever::create(CCSpawn::create(CallFuncExt::create([node, frames, ptrTag] {
         if (!node) return log::error("node = {}", node);
         if (!frames) return log::error("frames = {}", frames);
-        if (!node->getUserObject(fmt::format("animator-frames-array-{}", (int)frames))) return log::error("no animator-frames-array-{} in sprite!!!", (int)frames, frames);
+        if (!node->getUserObject(fmt::format("animator-frames-array-{}", ptrTag))) return log::error("no animator-frames-array-{} in sprite!!!", ptrTag);
 
         int nextIndex = frames->getTag();
         nextIndex = nextIndex >= frames->count() ? 0 : nextIndex;
