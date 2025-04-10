@@ -181,8 +181,8 @@ class $modify(CCScale9SpriteAnimatorAttach, CCScale9Sprite) {
         return rtn;
     }
 
-    static CCScale9Sprite* createWithSpriteFrameName(const char* spriteFrameName, CCRect capInsets) {
-        auto rtn = CCScale9Sprite::createWithSpriteFrameName(spriteFrameName, capInsets);
+    static CCScale9Sprite* createWithSpriteFrameName(const char* spriteFrameName) {
+        auto rtn = CCScale9Sprite::createWithSpriteFrameName(spriteFrameName);
         attachAnimator(rtn, spriteFrameName);
         return rtn;
     }
