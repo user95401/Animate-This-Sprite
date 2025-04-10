@@ -15,8 +15,6 @@ auto FOUND_ANIMATE_FILES() {
 
 $on_mod(Loaded) {
 
-    FOUND_ANIMATE_FILES();
-
     auto search_paths = {
         getMod()->getConfigDir().string(),
         getMod()->getSaveDir().string(),
@@ -35,6 +33,21 @@ class $modify(GameManagerFindAnimateFilesOnReload, GameManager) {
 
         return GameManager::reloadAll(switchingModes, toFullscreen, borderless, fix, unused);
     }
+
+};
+
+#include <Geode/modify/LoadingLayer.hpp>
+class $modify(LoadingLayerFindAnimateFiles, LoadingLayer) {
+
+    bool init(bool p0) {
+        FOUND_ANIMATE_FILES();
+        return LoadingLayer::init(p0);
+    };
+
+    void loadAssets() {
+        if (m_loadStep == 10)FOUND_ANIMATE_FILES();
+        return LoadingLayer::loadAssets();
+    };
 
 };
 
