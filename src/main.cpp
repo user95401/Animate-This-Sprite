@@ -5,11 +5,44 @@ using namespace geode::prelude;
 
 auto FOUNDED_ANIMATE_FILES = std::map<std::string, std::filesystem::path>();
 auto FOUND_ANIMATE_FILES() {
+    log::info("searching animate files...");
     FOUNDED_ANIMATE_FILES.clear();
     for (auto path : CCFileUtils::get()->getSearchPaths()) {
         //.animate.json
-        for (auto file : file::readDirectory(path.c_str()).unwrapOrDefault())
-            if (string::contains(file.string(), ".animate.json")) FOUNDED_ANIMATE_FILES[std::filesystem::path(file).filename().string()] = file;
+        //log::debug("reading {}", path);
+        for (auto file : file::readDirectory(path.c_str(), 1).unwrapOrDefault()) {
+            if (string::contains(file.string(), ".animate.json")) {
+
+                auto name = file.string();
+
+                auto search_paths = CCFileUtils::get()->getSearchPaths();
+                std::sort(search_paths.begin(), search_paths.end(), []
+                (const std::string& first, const std::string& second) {
+                        return first.size() > second.size();
+                    });
+                for (auto sp : search_paths) name = string::replace(name, sp, "");
+
+                name = string::replace(name, "{GameDir}", dirs::getGameDir().string()); //Directory where Geometry Dash is
+                name = string::replace(name, "{SaveDir}", dirs::getSaveDir().string()); //Directory where GD saves its files
+                name = string::replace(name, "{GeodeDir}", dirs::getGeodeDir().string()); //Directory where Geode is
+                name = string::replace(name, "{GeodeSaveDir}", dirs::getGeodeSaveDir().string()); //Directory where Geode saves its files
+                name = string::replace(name, "{GeodeResourcesDir}", dirs::getGeodeResourcesDir().string()); //Directory where Geode's resources are stored
+                name = string::replace(name, "{GeodeLogDir}", dirs::getGeodeLogDir().string()); //Directory where Geode's resources are stored
+                name = string::replace(name, "{TempDir}", dirs::getTempDir().string()); //Directory to store temporary files
+                name = string::replace(name, "{ModsDir}", dirs::getModsDir().string()); //Directory where mods are stored by default
+                name = string::replace(name, "{ModsSaveDir}", dirs::getModsSaveDir().string()); //Directory where mods' save data is stored
+                name = string::replace(name, "{ModRuntimeDir}", dirs::getModRuntimeDir().string()); //Directory where mods' unzipped packages are stored at runtime
+                name = string::replace(name, "{ModConfigDir}", dirs::getModConfigDir().string()); //Directory where mods' config files lie
+                name = string::replace(name, "{IndexDir}", dirs::getIndexDir().string()); //Directory where Geode stores the cached index
+                name = string::replace(name, "{CrashlogsDir}", dirs::getCrashlogsDir().string()); //Directory where crashlogs are stored
+                name = string::replace(name, "{ModPersistentDir}", dirs::getModPersistentDir().string()); //Directory where mods' persistent files lie, this directory is not deleted even when Geode is uninstalled
+
+                name = string::replace(name, "\\", "/");
+
+                FOUNDED_ANIMATE_FILES[name] = file;
+                log::info("founded animate file! name: {} (path: {})", name, file);
+            }
+        }
     };
 };
 
@@ -52,19 +85,38 @@ class $modify(LoadingLayerFindAnimateFiles, LoadingLayer) {
 };
 
 static void attachAnimator(CCNode* node, std::string name) {
+
+    name = string::replace(name, "\\", "/");
     //log::debug("SpriteAnimator::attach({}, {})", node, name);
 
     if (!node) return log::error("sprite = {}", node);
+
+    //C:/Users/user95401/AppData/Local/GeometryDash/geode/mods/geode.texture-loader/unzipped/user95401.animate-this-sprite.test-pack.zip/pack.png.animate.json
+    //C:/Users/user95401/AppData/Local/GeometryDash/geode/mods/geode.texture-loader/unzipped/user95401.animate-this-sprite.test-pack.zip/pack.png
 
     auto file = fmt::format("{}.animate.json", name);
     if (!FOUNDED_ANIMATE_FILES.contains(file.c_str())) return;
 
     auto json_read = file::readJson(FOUNDED_ANIMATE_FILES[file]);
-    if (json_read.err()) return log::error("sprite animator attach failed ar reading, {}. file: {}", json_read.err().value_or("unknown error"), file);
+    if (json_read.err()) return log::error("sprite animator attach failed at reading, {}. file: {}", json_read.err().value_or("unknown error"), file);
 
     auto json = json_read.unwrapOrDefault();
 
     //log::debug("{}", json.dump());
+
+    auto frame_cache = CCSpriteFrameCache::get();
+    if (json.contains("spritesheets") and frame_cache->m_pLoadedFileNames) {
+        if (json["spritesheets"].isArray()) {
+            for (const auto& nameEntry : json["spritesheets"]) {
+                auto filename = nameEntry.asString().unwrapOrDefault().c_str();
+                if (not frame_cache->m_pLoadedFileNames->contains(filename)) frame_cache->addSpriteFramesWithFile(filename);
+            };
+        }
+        else {
+            auto filename = json["spritesheets"].asString().unwrapOrDefault();
+            if (not frame_cache->m_pLoadedFileNames->contains(filename.c_str())) frame_cache->addSpriteFramesWithFile(filename.c_str());
+        }
+    };
 
     auto frame = [](const char* name) -> CCSpriteFrame*
         {
@@ -107,28 +159,31 @@ static void attachAnimator(CCNode* node, std::string name) {
         return result;
         };
 
-    auto frames = CCArray::create();
-    if (json["names"].isArray()) {
-        for (const auto& nameEntry : json["names"]) {
+    //old key name
+    if (json.contains("names")) json["frames"] = json["names"];
 
+    auto frames = CCArray::create();
+    if (json["frames"].isArray()) {
+        for (const auto& nameEntry : json["frames"]) {
+            ///
             for (const auto& frameName : expandFrameName(nameEntry.asString().unwrapOrDefault()))
                 if (auto tmpSprite = frame(frameName.c_str()))
                     if (auto frame = tmpSprite) frames->addObject(frame);
-
+            ///
         };
     }
     else {
-
-        for (const auto& frameName : expandFrameName(json["names"].asString().unwrapOrDefault()))
+        ///
+        for (const auto& frameName : expandFrameName(json["frames"].asString().unwrapOrDefault()))
             if (auto tmpSprite = frame(frameName.c_str()))
                 if (auto frame = tmpSprite) frames->addObject(frame);
-
+        ///
     }
 
     //log::debug("{}", frames);
 
     //iyea i know same thing exists in engine but i want made my analog :>
-    auto ptrTag = reinterpret_cast<uintptr_t>(frames);
+    auto ptrTag = reinterpret_cast<uintptr_t>(frames);//pls made that in CCMenuItemExt, i need unique ids
     node->setUserObject(fmt::format("animator-frames-array-{}", ptrTag), frames);
     node->runAction(CCRepeatForever::create(CCSpawn::create(CallFuncExt::create([node, frames, ptrTag] {
         if (!node) return log::error("node = {}", node);

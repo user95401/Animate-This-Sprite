@@ -6,7 +6,7 @@ to Geometry Dash texture objects using a JSON configuration file.
 You can define the animate config by creating a corresponding JSON file (the `{name}.animate.json`). 
 The mod automatically scans all search paths, loads the JSON configurations, and applies animations at runtime.
 
-[Download example resource pack](https://github.com/user95401/user95401/releases/download/AnimatedGradientBG/AnimatedGradientBG.zip)
+[Download example resource pack](https://github.com/user95401/Animate-This-Sprite/releases/download/test-pack/user95401.animate-this-sprite.test-pack.zip)
 
 ## File Organization
 
@@ -22,11 +22,11 @@ The mod automatically scans all search paths, loads the JSON configurations, and
   
 `WARN: don't forget .png, that is also part of name!`
 
-## JSON Configuration Content
+## JSON Animator Config File Content
 
 Your JSON configuration files control which images will be used for the animation and the timing between frames. The configuration contains at least two keys:
 
-- **"names"**:  
+- **"frames"**:  
   `This key can be either a string or an array of strings. It supports both a single image name and a numerical range for frame sequences.`
   
   **Examples:**
@@ -53,6 +53,55 @@ Your JSON configuration files control which images will be used for the animatio
 
 - **"delay"** (not required):  
   `A floating-point number that specifies the time (in seconds) between each frame. The default in the code is 0.1 seconds if not provided.`
+
+- **"spritesheets"** (not required):  
+  `Define string or array of strings. Mod will load sprite sheets by that value.`
+
+  **Examples:**
+
+  \- One sprite sheet:
+    ```json
+    { "names": "frame_{001-015}.png", "spritesheets": "frames.plist" }
+    ```
+
+  \- Array of sprite sheets:
+    ```json
+    { 
+        "names": "frame_{001-015}.png", 
+        "spritesheets": [
+            "frames1.plist"
+            "frames2.plist"
+        ]
+    }
+    ```
+
+## JSON Animator Config File Name Variables
+
+You can put `pack.png.animate.json` to
+```bash
+{ModsSaveDir}/geode.texture-loader/unzipped/user95401.animate-this-sprite.test-pack.zip/
+```
+for real full path
+```bash
+C:/Users/user95401/AppData/Local/GeometryDash/geode/mods/geode.texture-loader/unzipped/user95401.animate-this-sprite.test-pack.zip/
+```
+
+[Explore example resource pack...](https://github.com/user95401/Animate-This-Sprite/releases/download/test-pack/user95401.animate-this-sprite.test-pack.zip)
+
+- **{GameDir\}**: Directory where Geometry Dash is
+- **{SaveDir\}**: Directory where GD saves its files
+- {GeodeDir\}: Directory where Geode is
+- **{GeodeSaveDir\}**: Directory where Geode saves its files
+- {GeodeResourcesDir\}: Directory where Geode's resources are stored
+- {GeodeLogDir\}: Directory where Geode's resources are stored
+- {TempDir\}: Directory to store temporary files
+- {ModsDir\}: Directory where mods are stored by default
+- **{ModsSaveDir\}**: Directory where mods' save data is stored
+- **{ModRuntimeDir\}**: Directory where mods' unzipped packages are stored at runtime
+- **{ModConfigDir\}**: Directory where mods' config files lie
+- {IndexDir\}: Directory where Geode stores the cached index
+- {CrashlogsDir\}: Directory where crashlogs are stored
+- {ModPersistentDir\}: Directory where mods' persistent files lie, this directory is not deleted even when Geode is uninstalled
 
 ## Naming Conventions & Range Support
 
