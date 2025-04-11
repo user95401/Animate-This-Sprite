@@ -108,8 +108,8 @@ static void attachAnimator(CCNode* node, std::string name) {
     if (json.contains("spritesheets") and frame_cache->m_pLoadedFileNames) {
         if (json["spritesheets"].isArray()) {
             for (const auto& nameEntry : json["spritesheets"]) {
-                auto filename = nameEntry.asString().unwrapOrDefault().c_str();
-                if (not frame_cache->m_pLoadedFileNames->contains(filename)) frame_cache->addSpriteFramesWithFile(filename);
+                auto filename = nameEntry.asString().unwrapOrDefault();
+                if (not frame_cache->m_pLoadedFileNames->contains(filename.c_str())) frame_cache->addSpriteFramesWithFile(filename.c_str());
             };
         }
         else {
