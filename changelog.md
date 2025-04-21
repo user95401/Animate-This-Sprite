@@ -1,3 +1,6 @@
+# 1.0.3
+- More info to readme
+
 # 1.0.2
 - Support for harder sprite/frame names like full path or with relative subdir (mod.id/sprite.png)
 - Renamed `names` key to `frames` in animator setup

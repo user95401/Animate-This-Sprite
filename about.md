@@ -8,6 +8,8 @@ The mod automatically scans all search paths, loads the JSON configurations, and
 
 [Download example resource pack](https://github.com/user95401/Animate-This-Sprite/releases/download/test-pack/user95401.animate-this-sprite.test-pack.zip)
 
+*to load with texture loader by geode team*
+
 ## File Organization
 
 - **Resource Pack Directory:**  
@@ -120,3 +122,6 @@ C:/Users/user95401/AppData/Local/GeometryDash/geode/mods/geode.texture-loader/un
     ```
 
   If your file names include leading zeros, the code will maintain that format. (e.g., `"frame_{01-15}.png"` or `"frame_{001-015}.png"`)
+
+- **For Scale Factor...**
+  You SHOULD NOT put the `-hd` or `-uhd` to animator file name. Mod will not load it so! You should just add suffix to TEXTURE filename or spritesheet (as always was).
